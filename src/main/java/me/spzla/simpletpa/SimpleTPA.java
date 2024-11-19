@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -13,26 +14,36 @@ public final class SimpleTPA {
     public static final Logger LOGGER = LoggerFactory.getLogger("SimpleTPA");
     public static final SimpleTPA INSTANCE = new SimpleTPA();
 
-    public ArrayList<TPARequest> requests = new ArrayList<>();
+    public ArrayList<TeleportRequest> requests = new ArrayList<>();
 
-    public TPARequest createRequest(Player from, Player to) {
-        TPARequest request = new TPARequest(from, to);
+    public TeleportRequest createRequest(Player from, Player to) {
+        return this.createRequest(from, to, TeleportRequest.RequestMode.TELEPORT_TO_PLAYER);
+    }
+
+    public TeleportRequest createRequest(Player from, Player to, TeleportRequest.RequestMode mode) {
+        TeleportRequest request = new TeleportRequest(from, to, mode);
         requests.add(request);
         CompletableFuture.delayedExecutor(30, TimeUnit.SECONDS).execute(() -> {
-            LOGGER.info("Removed expired request from {} to {}", from.getName(), to.getName());
+            if (request.isActive()) {
+                request.expire();
+            }
             requests.remove(request);
+            LOGGER.info("Removed expired request from {} to {}", from.getName(), to.getName());
         });
 
         return request;
     }
 
-    public TPARequest findLatest(Player to) {
-        List<TPARequest> filtered = requests.stream().filter(req -> req.getTo().equals(to)).toList();
+    private final Comparator<TeleportRequest> sortByTimeSentDesc = (TeleportRequest a, TeleportRequest b) -> {
+        if (a.getSendTime() == b.getSendTime()) return 0;
+        return a.getSendTime() > b.getSendTime() ? -1 : 1;
+    };
 
-        List<TPARequest> filteredSorted = filtered.stream().sorted((a, b) -> {
-            if (a.getSendTime() == b.getSendTime()) return 0;
-            return a.getSendTime() > b.getSendTime() ? -1 : 1;
-        }).toList();
+    public TeleportRequest findForPlayer(Player player) {
+        List<TeleportRequest> filtered = requests.stream().filter(
+                req -> req.getReceiver().equals(player) || req.getSender().equals(player)).toList();
+
+        List<TeleportRequest> filteredSorted = filtered.stream().sorted(sortByTimeSentDesc).toList();
 
         if (!filteredSorted.isEmpty()) {
             return filteredSorted.getFirst();
@@ -41,28 +52,67 @@ public final class SimpleTPA {
         }
     }
 
-    public TPARequest findFrom(Player to, Player from) {
+    public TeleportRequest findFrom(Player player) {
+        List<TeleportRequest> filtered = requests.stream().filter(
+                req -> req.getSender().equals(player)).toList();
+
+        List<TeleportRequest> filteredSorted = filtered.stream().sorted(sortByTimeSentDesc).toList();
+
+        if (!filteredSorted.isEmpty()) {
+            return filteredSorted.getFirst();
+        } else {
+            return null;
+        }
+    }
+
+    public TeleportRequest findTo(Player player) {
+        List<TeleportRequest> filtered = requests.stream().filter(
+                req -> req.getReceiver().equals(player)).toList();
+
+        List<TeleportRequest> filteredSorted = filtered.stream().sorted(sortByTimeSentDesc).toList();
+
+        if (!filteredSorted.isEmpty()) {
+            return filteredSorted.getFirst();
+        } else {
+            return null;
+        }
+    }
+
+    public TeleportRequest findFromTo(Player to, Player from) {
         if (to.equals(from)) {
             return null;
         }
 
-        List<TPARequest> filtered = requests.stream().filter(req ->
-                req.getFrom().equals(from) && req.getTo().equals(to)).toList();
+        List<TeleportRequest> filtered = requests.stream().filter(req ->
+                req.getSender().equals(from) && req.getReceiver().equals(to)).toList();
 
         if (filtered.size() == 1) {
             return filtered.getFirst();
         } else {
-            List<TPARequest> filteredSorted = filtered.stream().sorted((a, b) -> {
-                if (a.getSendTime() == b.getSendTime()) return 0;
-                return a.getSendTime() > b.getSendTime() ? -1 : 1;
-            }).toList();
+            List<TeleportRequest> filteredSorted = filtered.stream().sorted(sortByTimeSentDesc).toList();
 
             return filteredSorted.getFirst();
         }
     }
 
-    public void acceptRequest(TPARequest request) {
-        request.accept();
+    public void acceptRequest(TeleportRequest request) {
+        if (request != null && request.isActive()) {
+            request.accept();
+        }
+        requests.remove(request);
+    }
+
+    public void cancelRequest(TeleportRequest request) {
+        if (request != null && request.isActive()) {
+            request.cancel();
+        }
+        requests.remove(request);
+    }
+
+    public void rejectRequest(TeleportRequest request) {
+        if (request != null && request.isActive()) {
+            request.reject();
+        }
         requests.remove(request);
     }
 }

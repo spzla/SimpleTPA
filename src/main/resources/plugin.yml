@@ -1,11 +1,20 @@
 name: SimpleTPA
-version: '0.1.0'
+version: '0.2.0'
 main: me.spzla.simpletpa.SimpleTPAPlugin
 api-version: '1.21'
 commands:
   tpa:
-    description: tp accept
-    usage: /<command>
+    description: tpa
+    usage: /<command> <player>
   tpaccept:
     description: tp accept;
-    usage: /<command>
+    usage: /<command> [player]
+  tpahere:
+    description: tpahere
+    usage: /<command> <player>
+  tpcancel:
+    description: tpcancel
+    usage: /<command> [player]
+  tpreject:
+    description: tpreject
+    usage: /<command> [player]

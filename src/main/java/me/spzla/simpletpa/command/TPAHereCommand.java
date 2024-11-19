@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class TPACommand implements CommandExecutor {
+public class TPAHereCommand  implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
@@ -28,11 +28,12 @@ public class TPACommand implements CommandExecutor {
         }
 
         if (to.equals(sender)) {
-            sender.sendMessage("nie mozesz tpa sam do siebie");
+            sender.sendMessage("nie mozesz tpahere sam do siebie");
             return true;
         }
 
-        TeleportRequest request = SimpleTPA.INSTANCE.createRequest(sender, to);
+        TeleportRequest request = SimpleTPA.INSTANCE.createRequest(
+                sender, to, TeleportRequest.RequestMode.TELEPORT_PLAYER_HERE);
 
         request.send();
 
