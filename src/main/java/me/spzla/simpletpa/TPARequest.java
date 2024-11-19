@@ -2,12 +2,12 @@ package me.spzla.simpletpa;
 
 import org.bukkit.entity.Player;
 
-public class TpaRequest {
+public class TPARequest {
     private Player from;
     private Player to;
     private long sendTime;
 
-    public TpaRequest(Player from, Player to) {
+    public TPARequest(Player from, Player to) {
         this.from = from;
         this.to = to;
         this.sendTime = System.currentTimeMillis();

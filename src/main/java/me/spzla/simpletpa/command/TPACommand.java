@@ -1,7 +1,7 @@
 package me.spzla.simpletpa.command;
 
 import me.spzla.simpletpa.SimpleTPA;
-import me.spzla.simpletpa.TpaRequest;
+import me.spzla.simpletpa.TPARequest;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,9 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-
-public class TpaCommand implements CommandExecutor {
+public class TPACommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
@@ -34,7 +32,7 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
-        TpaRequest request = SimpleTPA.INSTANCE.createRequest(sender, to);
+        TPARequest request = SimpleTPA.INSTANCE.createRequest(sender, to);
 
         request.send();
 

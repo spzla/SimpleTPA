@@ -1,7 +1,7 @@
 package me.spzla.simpletpa.command;
 
 import me.spzla.simpletpa.SimpleTPA;
-import me.spzla.simpletpa.TpaRequest;
+import me.spzla.simpletpa.TPARequest;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class TpAcceptCommand implements CommandExecutor {
+public class TPAcceptCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender,
                              @NotNull Command command,
@@ -17,7 +17,7 @@ public class TpAcceptCommand implements CommandExecutor {
                              @NotNull String[] strings) {
         if ( !(commandSender instanceof Player sender) ) return true;
 
-        TpaRequest request = null;
+        TPARequest request = null;
 
         if ( strings.length == 0 || strings[0].isEmpty() ) {
             request = SimpleTPA.INSTANCE.findLatest(sender);
